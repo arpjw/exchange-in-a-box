@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1017">
+  <meta name="description" content="Explore a deterministic OCaml exchange simulator through seeded replay, order books, routing, and paired synthetic interventions.">
+  <title>Exchange in a Box — Market Microstructure Lab</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/bridge.bc.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <a class="brand" href="#top" aria-label="Exchange in a Box home"><span class="brand-mark">X<span>↗</span></span><span>EXCHANGE<br><strong>IN A BOX</strong></span></a>
+      <div class="rail-label">LAB MODULES</div>
+      <nav class="navigation" aria-label="Lab modules">
+        <button class="nav-item active" data-view="replay"><span class="nav-icon">▦</span> Market replay <span class="nav-num">01</span></button>
+        <button class="nav-item" data-view="orders"><span class="nav-icon">⇄</span> Order sandbox <span class="nav-num">02</span></button>
+        <button class="nav-item" data-view="router"><span class="nav-icon">⌁</span> Venue router <span class="nav-num">03</span></button>
+        <button class="nav-item" data-view="intervention"><span class="nav-icon">◈</span> Intervention <span class="nav-num">04</span></button>
+      </nav>
+      <div class="rail-bottom"><div class="online-dot"></div><div><strong>OCAML CORE ONLINE</strong><small>Executes in your browser</small></div></div>
+    </aside>
+
+    <main id="top" class="main">
+      <header class="topbar"><div class="breadcrumb">RESEARCH TERMINAL <span>/</span> <strong id="crumb">MARKET REPLAY</strong></div><div class="top-actions"><span class="synthetic-pill"><span></span> SYNTHETIC ENVIRONMENT</span><a href="/paper.pdf" target="_blank" rel="noopener">READ THE PAPER ↗</a></div></header>
+
+      <section class="masthead"><div><div class="eyebrow"><span class="eyebrow-line"></span> DETERMINISTIC MARKET MICROSTRUCTURE LAB <span class="version">v0.3</span></div><h1 id="view-title">Watch a market <em>take shape.</em></h1><p id="view-subtitle">Run a seeded OCaml simulation, inspect its state at every sampled step, and replay the exact same path.</p></div><div class="masthead-art" aria-hidden="true"><div class="ring ring-one"></div><div class="ring ring-two"></div><div class="ring ring-three"></div><span>μ</span></div></section>
+
+      <section class="view active" id="view-replay" aria-labelledby="view-title">
+        <div class="section-head"><div><span class="section-index">01 / SCENARIO ENGINE</span><h2>Market replay</h2></div><span class="section-note">Same seed · same sequence · same result</span></div>
+        <form id="scenario-form" class="control-strip">
+          <label>RANDOM SEED<input name="seed" type="number" value="42" step="1" required></label>
+          <label>POPULATION EVENTS<input name="events" type="number" min="0" max="10000" value="1200" required></label>
+          <label>AGENTS<input name="agents" type="number" min="2" max="100" value="16" required></label>
+          <label>BUY SHOCK · LOTS<input name="impact" type="number" min="0" max="1000" value="250" required></label>
+          <button class="primary-button" type="submit">RUN SCENARIO <span>→</span></button>
+        </form>
+        <div id="scenario-error" class="error" role="alert" hidden></div>
+        <div class="metrics" id="scenario-metrics">
+          <div class="metric"><span>FINAL MIDPOINT</span><strong id="metric-mid">—</strong><small>price ticks</small></div>
+          <div class="metric"><span>TRADED VOLUME</span><strong id="metric-volume">—</strong><small>lots across all fills</small></div>
+          <div class="metric"><span>EXECUTIONS</span><strong id="metric-fills">—</strong><small>matched trades</small></div>
+          <div class="metric"><span>SHOCK COST</span><strong id="metric-cost">—</strong><small>ticks × lots from initial mid</small></div>
+        </div>
+        <div class="workspace-grid">
+          <article class="panel chart-panel"><div class="panel-head"><div><span class="panel-kicker">PRICE PATH</span><h3>Midpoint over event time</h3></div><span class="legend"><i></i> MIDPRICE</span></div><div id="scenario-chart" class="chart" aria-label="Midpoint chart"></div><div class="timeline"><div class="timeline-top"><span>REPLAY POSITION</span><strong id="timeline-step">EVENT 0 / 0</strong></div><input id="timeline" type="range" min="0" max="0" value="0" aria-label="Replay position"><div class="timeline-labels"><span>INITIAL BOOK</span><span>FINAL STATE</span></div></div></article>
+          <article class="panel depth-panel"><div class="panel-head"><div><span class="panel-kicker">ORDER BOOK</span><h3>Depth at selected step</h3></div><span id="depth-spread" class="mono-tag">SPREAD —</span></div><div class="depth-columns"><div><div class="depth-heading"><span>BID SIZE</span><span>PRICE</span></div><div id="replay-bids" class="depth-list"></div></div><div><div class="depth-heading ask-heading"><span>PRICE</span><span>ASK SIZE</span></div><div id="replay-asks" class="depth-list"></div></div></div><div class="panel-foot"><span>Displayed resting depth</span><span id="depth-imbalance">IMBALANCE —</span></div></article>
+        </div>
+        <p class="context-note"><b>About this path.</b> The OCaml scenario engine generates population orders against a seeded ladder. Values are simulated mechanics, not market forecasts or evidence of profitable trading.</p>
+      </section>
+
+      <section class="view" id="view-orders" aria-labelledby="view-title">
+        <div class="section-head"><div><span class="section-index">02 / INTERACTIVE BOOK</span><h2>Order sandbox</h2></div><button id="reset-book" class="ghost-button" type="button">RESET BOOK ↻</button></div>
+        <div class="workspace-grid order-grid">
+          <article class="panel"><div class="panel-head"><div><span class="panel-kicker">ENTER ORDER</span><h3>Place into the matching engine</h3></div><span class="mono-tag">PRICE–TIME PRIORITY</span></div><form id="order-form" class="stack-form"><div class="form-row"><label>ACCOUNT<select name="account" id="order-account"></select></label><label>SIDE<select name="side"><option value="buy">Buy</option><option value="sell">Sell</option></select></label></div><div class="form-row"><label>LIMIT PRICE<input name="price" type="number" min="1" max="1000000000" value="10001" required></label><label>QUANTITY · LOTS<input name="quantity" type="number" min="1" max="1000000000" value="75" required></label></div><label>ORDER POLICY<select name="policy"><option value="gtc">Good till cancelled</option><option value="ioc">Immediate or cancel</option><option value="fok">Fill or kill</option><option value="post">Post only</option></select></label><button class="primary-button full" type="submit">SUBMIT ORDER <span>→</span></button></form><div id="order-notice" class="notice" aria-live="polite">The sandbox begins with a symmetric eight-level book.</div><div class="minor-actions"><label>ACCOUNT ACTION<select id="risk-account"></select></label><button id="halt-account" class="ghost-button" type="button">HALT</button><button id="resume-account" class="ghost-button" type="button">RESUME</button></div></article>
+          <article class="panel depth-panel"><div class="panel-head"><div><span class="panel-kicker">LIVE STATE</span><h3>Resting depth</h3></div><span id="manual-spread" class="mono-tag">SPREAD —</span></div><div class="depth-columns"><div><div class="depth-heading"><span>BID SIZE</span><span>PRICE</span></div><div id="manual-bids" class="depth-list"></div></div><div><div class="depth-heading ask-heading"><span>PRICE</span><span>ASK SIZE</span></div><div id="manual-asks" class="depth-list"></div></div></div><div class="panel-foot"><span>Click an order ID to cancel it from its owner account</span></div></article>
+        </div>
+        <div class="workspace-grid lower-grid"><article class="panel"><div class="panel-head"><div><span class="panel-kicker">RISK LEDGER</span><h3>Account positions</h3></div></div><div class="table-wrap"><table><thead><tr><th>ACCOUNT</th><th>POSITION</th><th>CASH</th><th>STATE</th></tr></thead><tbody id="accounts-table"></tbody></table></div></article><article class="panel"><div class="panel-head"><div><span class="panel-kicker">EVENT TAPE</span><h3>Accepted & rejected actions</h3></div></div><div id="event-tape" class="event-tape"></div></article></div>
+      </section>
+
+      <section class="view" id="view-router" aria-labelledby="view-title">
+        <div class="section-head"><div><span class="section-index">03 / CROSS-VENUE ALLOCATION</span><h2>Static venue router</h2></div><span class="section-note">Planning only · no orders sent</span></div>
+        <form id="router-form" class="control-strip router-strip"><label>TAKER SIDE<select name="side"><option value="buy">Buy</option><option value="sell">Sell</option></select></label><label>TARGET LOTS<input name="quantity" type="number" min="1" max="1000" value="350" required></label><label>ALPHA FEE · TICKS<input name="alpha" type="number" min="-50" max="50" value="0" required></label><label>BETA FEE · TICKS<input name="beta" type="number" min="-50" max="50" value="0" required></label><label>GAMMA FEE · TICKS<input name="gamma" type="number" min="-50" max="50" value="0" required></label><button class="primary-button" type="submit">OPTIMIZE <span>→</span></button></form>
+        <div class="router-summary"><div><span>FILLED</span><strong id="route-filled">—</strong></div><div><span>UNFILLED</span><strong id="route-unfilled">—</strong></div><div><span>TOTAL OBJECTIVE COST</span><strong id="route-cost">—</strong></div></div>
+        <article class="panel"><div class="panel-head"><div><span class="panel-kicker">ALLOCATION TRACE</span><h3>One maker at a time</h3></div><span class="mono-tag">MAX FILL / MIN COST</span></div><div class="table-wrap"><table><thead><tr><th>STEP</th><th>VENUE</th><th>MAKER</th><th>PRICE</th><th>LOTS</th><th>FEE</th><th>LATENCY WEIGHT</th><th>UNIT COST</th></tr></thead><tbody id="route-table"></tbody></table></div></article><p class="context-note"><b>Static displayed depth.</b> The optimizer reads three synthetic venue books and applies price, configured fees, and latency weights. The trace is a deterministic plan; depth can change before real execution.</p>
+      </section>
+
+      <section class="view" id="view-intervention" aria-labelledby="view-title">
+        <div class="section-head"><div><span class="section-index">04 / PAIRED COUNTERFACTUAL</span><h2>Synthetic intervention</h2></div><span class="section-note">Shared random innovations</span></div>
+        <form id="intervention-form" class="control-strip"><label>RANDOM SEED<input name="seed" type="number" value="1000" required></label><label>POPULATION EVENTS<input name="events" type="number" min="0" max="2000" value="500" required></label><label>BUY SHOCK · LOTS<input name="shock" type="number" min="0" max="2000" value="200" required></label><label>REGIME<select name="regime"><option value="passive">Passive makers</option><option value="active">Active flow</option></select></label><button class="primary-button" type="submit">RUN PAIR <span>→</span></button></form>
+        <div class="pair-visual"><div class="pair-arm"><span>CONTROL BOOK</span><strong id="control-mid">—</strong><small>FINAL MIDPOINT · TICKS</small></div><div class="pair-divider"><div>Δ</div><strong id="pair-diff">—</strong><small>SHOCK − CONTROL</small></div><div class="pair-arm shocked"><span>SHOCKED BOOK</span><strong id="shock-mid">—</strong><small>FINAL MIDPOINT · TICKS</small></div></div>
+        <div class="pair-detail"><div><span>SHOCK FILLED</span><strong id="pair-filled">—</strong><small>lots</small></div><div><span>INITIAL SHOCK COST</span><strong id="pair-cost">—</strong><small>ticks × lots</small></div><div><span>COMMON INNOVATIONS</span><strong id="pair-digest">—</strong><small>digest prefix</small></div></div>
+        <article class="panel study-panel"><div class="panel-head"><div><span class="panel-kicker">SAVED 40-SEED STUDY</span><h3>Midpoint response by configuration</h3></div><a href="/paper.pdf#page=5" target="_blank" rel="noopener">METHODS ↗</a></div><div class="table-wrap"><table><thead><tr><th>REGIME</th><th>SHOCK LOTS</th><th>MEAN DIFFERENCE</th><th>95% BOOTSTRAP INTERVAL</th></tr></thead><tbody><tr><td>Passive</td><td>200</td><td class="positive">+1.475 ticks</td><td>[1.325, 1.625]</td></tr><tr><td>Passive</td><td>800</td><td class="positive">+3.500 ticks</td><td>[3.025, 4.025]</td></tr><tr><td>Active</td><td>200</td><td class="positive">+1.1625 ticks</td><td>[1.025, 1.300]</td></tr><tr><td>Active</td><td>800</td><td class="positive">+3.950 ticks</td><td>[3.4625, 4.425]</td></tr></tbody></table></div></article><p class="context-note"><b>Interpretation.</b> Pairs share population innovations and differ only by the declared buy shock. These intervals describe seed variation inside this simulator. They are not estimates of real market impact.</p>
+      </section>
+
+      <footer><span>EXCHANGE IN A BOX · RESEARCH LAB</span><span>BUILT WITH OCAML <i>◆</i> SYNTHETIC DATA ONLY</span><a href="/paper.pdf" target="_blank" rel="noopener">PAPER ↗</a></footer>
+    </main>
+  </div>
+</body>
+</html>

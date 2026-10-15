@@ -2,4 +2,7 @@
 type config = { seed : int; events : int; agents : int; initial_price : int; impact_lots : int }
 type report = { accepted : int; rejected : int; fills : int; volume : int; final_mid : float option; impact_cost : int64; state : Risk.t }
 val run : config -> (report, string) result
+(* Identical scenario execution with bounded sampled states. Sample zero follows
+   the initial ladder and impact order; the last sample is the final state. *)
+val trace : ?max_samples:int -> config -> (report * (int * Risk.t) list, string) result
 val summary : config -> report -> string

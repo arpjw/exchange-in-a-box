@@ -1,0 +1,17 @@
+(library
+ (name web_lab)
+ (wrapped false)
+ (modules lab)
+ (libraries exchange_in_a_box yojson))
+
+(executable
+ (name bridge)
+ (modes js)
+ (modules bridge)
+ (libraries web_lab exchange_in_a_box js_of_ocaml)
+ (preprocess (pps js_of_ocaml-ppx)))
+
+(test
+ (name lab_test)
+ (modules lab_test)
+ (libraries web_lab exchange_in_a_box yojson))

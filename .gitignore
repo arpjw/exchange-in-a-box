@@ -3,6 +3,7 @@ _build_*/
 *.install
 .opam-switch/
 .DS_Store
+.vercel/
 paper/*.tex
 paper/*.aux
 paper/*.log

@@ -16,7 +16,12 @@ dune exec exchange-async-worker
 dune exec exchange-control-room
 bash scripts/demo_control_room.sh
 bash scripts/stress.sh
+bash scripts/build-web.sh
 ```
+
+## Browser lab
+
+The [browser lab](web/README.md) runs the pure OCaml matching, risk, scenario, routing, and paired-intervention modules through `js_of_ocaml`. It offers a sampled market replay, manual order sandbox, static cross-venue planner, and paired synthetic comparison. Vercel serves only `web/public`; the checked-in browser bundle and paper PDF are rebuilt with `bash scripts/build-web.sh` after core or paper changes. Browser calculations use the same OCaml modules as native tests. The Async worker, Incremental adapter, and journal remain native-only.
 
 ## Implemented system
 

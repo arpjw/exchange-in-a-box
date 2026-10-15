@@ -1,0 +1,30 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.resolve(__dirname, '..');
+const bundle = path.join(root, 'web/public/bridge.bc.js');
+assert.ok(fs.statSync(bundle).size > 1000, 'OCaml browser bundle exists');
+const { ExchangeBox: core } = require(bundle);
+const read = value => JSON.parse(value);
+const initial = read(core.current());
+assert.equal(initial.quote.bid, 9999);
+assert.equal(initial.quote.ask, 10001);
+const placed = read(core.place(2, 'buy', 10001, 50, 'ioc'));
+assert.equal(placed.event, 'accepted');
+assert.equal(placed.trades[0].quantity, 50);
+const reset = read(core.reset());
+assert.deepEqual(reset.bids, initial.bids);
+assert.deepEqual(reset.asks, initial.asks);
+const run = read(core.scenario(42, 250, 8, 200));
+assert.equal(run.frames[0].step, 0);
+assert.equal(run.frames.at(-1).step, 250);
+assert.equal(run.finalMid,
+  run.frames.at(-1).quote == null ? null :
+  (run.frames.at(-1).quote.bid + run.frames.at(-1).quote.ask) / 2);
+assert.deepEqual(read(core.scenario(42, 250, 8, 200)), run, 'same seed replays exactly');
+const noShock = read(core.intervention(1000, 150, 0, 'passive'));
+assert.equal(noShock.difference, 0);
+const route = read(core.route('buy', 350, 0, 0, 0));
+assert.equal(route.filled, 350);
+assert.equal(route.fills.reduce((sum, fill) => sum + fill.quantity, 0), 350);
+console.log('compiled OCaml browser bridge passed');

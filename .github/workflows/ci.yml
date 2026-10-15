@@ -8,7 +8,7 @@ permissions:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: ocaml/setup-ocaml@v3
@@ -18,6 +18,8 @@ jobs:
       - run: opam install . --deps-only --with-test -y
       - run: opam exec -- dune build @all
       - run: opam exec -- dune runtest --force
+      - run: opam exec -- bash scripts/build-web.sh
+      - run: node scripts/test-web.cjs
       - run: opam exec -- dune exec exchange-demo
       - run: opam exec -- bash scripts/stress.sh
         env:
