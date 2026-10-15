@@ -13,3 +13,9 @@
  (deps async_process.py)
  (action
   (run python3 %{dep:async_process.py} %{exe:../../bin/worker.exe} %{exe:../../bin/async_worker.exe})))
+
+(rule
+ (alias runtest)
+ (deps control_process.py)
+ (action
+  (run python3 %{dep:control_process.py} %{exe:../../bin/control_room.exe})))

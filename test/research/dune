@@ -16,3 +16,13 @@
  (name marked_hawkes_test)
  (modules marked_hawkes_test)
  (libraries exchange_in_a_box))
+
+(test
+ (name experiment_test)
+ (modules experiment_test)
+ (libraries exchange_in_a_box))
+
+(executable
+ (name experiment_study)
+ (modules experiment_study)
+ (libraries exchange_in_a_box))

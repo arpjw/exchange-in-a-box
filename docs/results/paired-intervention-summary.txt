@@ -1,0 +1,6 @@
+passive shock=0 n=40 missing=0 mean=0 sd=0 q025=0 median=0 q975=0 bootstrap95=[0,0]
+passive shock=200 n=40 missing=0 mean=1.475 sd=0.50573633 q025=1 median=1 q975=2 bootstrap95=[1.325,1.625]
+passive shock=800 n=40 missing=0 mean=3.5 sd=1.6329932 q025=1 median=3 q975=7 bootstrap95=[3.025,4.025]
+active shock=0 n=40 missing=0 mean=0 sd=0 q025=0 median=0 q975=0 bootstrap95=[0,0]
+active shock=200 n=40 missing=0 mean=1.1625 sd=0.47214052 q025=0 median=1 q975=2 bootstrap95=[1.025,1.3]
+active shock=800 n=40 missing=0 mean=3.95 sd=1.5762663 q025=1 median=4 q975=6.025 bootstrap95=[3.4625,4.425]

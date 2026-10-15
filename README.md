@@ -13,6 +13,8 @@ dune runtest
 dune exec exchange-demo
 dune exec exchange-scenario -- --seed 42 --events 10000 --agents 20 --impact-lots 250
 dune exec exchange-async-worker
+dune exec exchange-control-room
+bash scripts/demo_control_room.sh
 bash scripts/stress.sh
 ```
 
@@ -29,14 +31,16 @@ bash scripts/stress.sh
 - Single-instrument account controls: positions, cash, order reservations, limits, halt/resume, authorized cancellation, and GTC, IOC, FOK, and post-only policies.
 - Synchronous and Async line-protocol workers. Incremental observes derived quotes and suppresses unchanged updates.
 - Seeded synthetic populations and reproducible scenario reports.
+- Static cross-venue routing plans that maximize displayed fill and minimize configured price, fee, and latency-weighted cost.
+- A terminal control room for book depth, quotes, account risk, order actions, and seeded scenarios. See [control room usage](scripts/CONTROL_ROOM.md).
 
 ## Mathematics
 
-The [paper draft](paper/exchange_in_a_box.pdf) formalizes the transition system, matching and ledger invariants, quote imbalance and microprice, and one- and two-type exponential Hawkes models. The code evaluates exact likelihoods and compensator increments, simulates bounded seeded paths, and compares Poisson with a finite-grid univariate Hawkes fit on a chronological holdout. [Research methods and saved synthetic results](docs/research.md) document the evaluation and its limits. These are descriptive and software-validation results, not calibrated market findings. The repository contains the PDF; the editable LaTeX source remains local.
+The [paper draft](paper/exchange_in_a_box.pdf) formalizes matching and ledger invariants, static routing optimality, quote imbalance and microprice, and one- and two-type exponential Hawkes models. The code evaluates exact likelihoods and compensator increments, simulates bounded seeded paths, and compares Poisson with a finite-grid univariate Hawkes fit on a chronological holdout. A [paired synthetic intervention](docs/paired-intervention.md) shares population innovations between shocked and control books and reports saved seed-level results. [Research methods and saved arrival-model results](docs/research.md) document the evaluation and its limits. These are synthetic and software-validation results, not calibrated market findings. The repository contains the PDF; the editable LaTeX source remains local.
 
 ## Validation
 
-`dune runtest` covers directed invariants, journal corruption and truncation, risk-policy atomicity, point-process formulas, and real worker subprocesses. `bash scripts/stress.sh` builds and runs the full suite plus repeated multi-seed scenario determinism checks. [Runtime and stress details](scripts/README.md) include larger-run settings. GitHub Actions runs the same gates on pushes and pull requests.
+`dune runtest` covers directed invariants, journal corruption and truncation, risk-policy atomicity, a seeded exhaustive routing oracle, point-process formulas, paired intervention identity, and real worker subprocesses. `bash scripts/stress.sh` builds and runs the full suite plus repeated multi-seed scenario determinism checks. [Runtime and stress details](scripts/README.md) include larger-run settings. GitHub Actions runs the same gates on pushes and pull requests.
 
 ## Boundaries
 

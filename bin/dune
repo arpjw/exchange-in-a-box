@@ -21,3 +21,9 @@
  (modules async_worker)
  (public_name exchange-async-worker)
  (libraries exchange_in_a_box.adapters async))
+
+(executable
+ (name control_room)
+ (modules control_room)
+ (public_name exchange-control-room)
+ (libraries exchange_in_a_box.adapters async))
