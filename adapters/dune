@@ -1,0 +1,5 @@
+(library
+ (name exchange_adapters)
+ (wrapped false)
+ (public_name exchange_in_a_box.adapters)
+ (libraries exchange_in_a_box async incremental))

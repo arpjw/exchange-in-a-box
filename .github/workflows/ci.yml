@@ -1,0 +1,25 @@
+name: OCaml validation
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: '5.2'
+          dune-cache: true
+      - run: opam install . --deps-only --with-test -y
+      - run: opam exec -- dune build @all
+      - run: opam exec -- dune runtest --force
+      - run: opam exec -- dune exec exchange-demo
+      - run: opam exec -- bash scripts/stress.sh
+        env:
+          STRESS_SEEDS: '8'
+          STRESS_EVENTS: '20000'

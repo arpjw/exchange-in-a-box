@@ -22,17 +22,19 @@ type trade =
 type rejection = Invalid_order | Duplicate_id | Unknown_id
 type status = Accepted | Rejected of rejection
 
+module Ids = Set.Make (Int)
+
 type t =
   { bids : order list
   ; asks : order list
-  ; seen : int list
+  ; seen : Ids.t
   ; next_sequence : int
   }
 
-let empty = { bids = []; asks = []; seen = []; next_sequence = 0 }
+let empty = { bids = []; asks = []; seen = Ids.empty; next_sequence = 0 }
 let bids t = t.bids
 let asks t = t.asks
-let seen_count t = List.length t.seen
+let seen_count t = Ids.cardinal t.seen
 
 let ahead side (a : order) (b : order) =
   let price_first =
@@ -42,11 +44,14 @@ let ahead side (a : order) (b : order) =
   in
   price_first || (a.price = b.price && a.sequence < b.sequence)
 
-let rec insert side order = function
-  | [] -> [ order ]
-  | head :: tail as orders ->
-      if ahead side order head then order :: orders
-      else head :: insert side order tail
+let insert side order orders =
+  let rec loop prefix = function
+    | [] -> List.rev_append prefix [order]
+    | head :: tail as rest ->
+        if ahead side order head then List.rev_append prefix (order :: rest)
+        else loop (head :: prefix) tail
+  in
+  loop [] orders
 
 let crosses (taker : order) (maker : order) =
   match taker.side with
@@ -66,11 +71,13 @@ let rec match_orders (taker : order) (makers : order list) trades =
       match_orders taker makers (trade :: trades)
   | _ -> taker, makers, List.rev trades
 
-let rec remove id = function
-  | [] -> None
-  | order :: tail when order.id = id -> Some tail
-  | order :: tail ->
-      Option.map (fun rest -> order :: rest) (remove id tail)
+let remove id orders =
+  let rec loop prefix = function
+    | [] -> None
+    | order :: tail when order.id = id -> Some (List.rev_append prefix tail)
+    | order :: tail -> loop (order :: prefix) tail
+  in
+  loop [] orders
 
 let apply t = function
   | Cancel id ->
@@ -84,10 +91,10 @@ let apply t = function
       if id < 0 || price <= 0 || quantity <= 0 || price > 1_000_000_000
          || quantity > 1_000_000_000
       then t, Rejected Invalid_order, []
-      else if List.mem id t.seen then t, Rejected Duplicate_id, []
+      else if Ids.mem id t.seen then t, Rejected Duplicate_id, []
       else
         let order = { id; side; price; quantity; sequence = t.next_sequence } in
-        let t = { t with seen = id :: t.seen; next_sequence = t.next_sequence + 1 } in
+        let t = { t with seen = Ids.add id t.seen; next_sequence = t.next_sequence + 1 } in
         match side with
         | Buy ->
             let remainder, asks, trades = match_orders order t.asks [] in
@@ -125,7 +132,7 @@ let check_invariants t =
   let orders = t.bids @ t.asks in
   if not (check_side Buy t.bids && check_side Sell t.asks) then
     Error "orders violate side, positive quantity, or price-time priority"
-  else if List.exists (fun order -> not (List.mem order.id t.seen)) orders then
+  else if List.exists (fun order -> not (Ids.mem order.id t.seen)) orders then
     Error "resting order is missing from the seen-id registry"
   else if List.length (List.sort_uniq Int.compare (List.map (fun o -> o.id) orders))
           <> List.length orders

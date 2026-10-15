@@ -1,0 +1,15 @@
+(test
+ (name runtime_test)
+ (modules runtime_test)
+ (libraries exchange_in_a_box))
+
+(test
+ (name adapters_test)
+ (modules adapters_test)
+ (libraries exchange_in_a_box.adapters))
+
+(rule
+ (alias runtest)
+ (deps async_process.py)
+ (action
+  (run python3 %{dep:async_process.py} %{exe:../../bin/worker.exe} %{exe:../../bin/async_worker.exe})))

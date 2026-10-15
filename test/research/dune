@@ -1,0 +1,18 @@
+(test
+ (name research_test)
+ (modules research_test)
+ (libraries exchange_in_a_box))
+
+(executable
+ (name research_stress)
+ (modules research_stress)
+ (libraries exchange_in_a_box))
+
+(rule
+ (alias research-stress)
+ (action (run ./research_stress.exe)))
+
+(test
+ (name marked_hawkes_test)
+ (modules marked_hawkes_test)
+ (libraries exchange_in_a_box))

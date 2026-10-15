@@ -1,39 +1,43 @@
 # Exchange in a Box
 
-A deterministic OCaml laboratory for limit order books and market microstructure. The first implementation has a pure price-time-priority matching engine, reproducible event replay, exact tick and lot arithmetic, top-of-book statistics, and an exponential Hawkes likelihood for event arrival times.
+A deterministic OCaml laboratory for limit order books and market microstructure. It combines a pure matching core, multi-route replay, a checksummed event journal, account risk controls, synthetic populations, and point-process research. Async and Incremental adapters provide a live protocol boundary and reactive quotes while keeping the core deterministic.
 
 This is a research simulator. It has no broker or exchange connectivity and does not make claims about trading profitability.
 
 ## Run
 
-Requires OCaml and Dune. The current code uses only the OCaml standard library.
+Requires OCaml 5.1 or later, Dune, Python 3 for subprocess tests, and the declared Async and Incremental packages. The pure `exchange_in_a_box` core uses only the OCaml standard library; `exchange_in_a_box.adapters` holds the Jane Street integrations.
 
 ```sh
 dune runtest
 dune exec exchange-demo
+dune exec exchange-scenario -- --seed 42 --events 10000 --agents 20 --impact-lots 250
+dune exec exchange-async-worker
+bash scripts/stress.sh
 ```
 
-## Current semantics
+## Implemented system
 
-- One instrument, limit orders and cancellations.
-- Integer prices in ticks and quantities in lots, with a bound of one billion on each submitted value.
+- Price-time-priority limit books with submissions and cancellations. Prices and quantities are integer ticks and lots, bounded at one billion per submission.
 - Best price first, then earliest accepted order at that price.
 - Trades execute at the resting order's limit price.
 - An accepted order ID can never be reused, including after a full fill or cancellation.
 - Invalid submissions and unknown cancellations leave the book unchanged.
-- Replay is a pure fold over commands. Identical command sequences produce identical state and outputs.
+- Multi-venue and multi-instrument routing, with IDs scoped to a route. Replay is a pure fold over timestamped events.
+- Deterministic delivery scheduling with latency, stable ties, and explicit drops.
+- Versioned, checksummed journal with complete-record validation, incomplete-tail recovery, and a buffered single-writer API.
+- Single-instrument account controls: positions, cash, order reservations, limits, halt/resume, authorized cancellation, and GTC, IOC, FOK, and post-only policies.
+- Synchronous and Async line-protocol workers. Incremental observes derived quotes and suppresses unchanged updates.
+- Seeded synthetic populations and reproducible scenario reports.
 
 ## Mathematics
 
-The [paper draft](paper/exchange_in_a_box.pdf) formalizes the transition system, conservation and book invariants, quote imbalance and microprice, and a stationary exponential Hawkes arrival model. The Hawkes module evaluates the exact point-process log likelihood and compensator increments. These are descriptive tools and hypotheses, not calibrated results. The repository contains the PDF; the editable LaTeX source remains local.
+The [paper draft](paper/exchange_in_a_box.pdf) formalizes the transition system, matching and ledger invariants, quote imbalance and microprice, and one- and two-type exponential Hawkes models. The code evaluates exact likelihoods and compensator increments, simulates bounded seeded paths, and compares Poisson with a finite-grid univariate Hawkes fit on a chronological holdout. [Research methods and saved synthetic results](docs/research.md) document the evaluation and its limits. These are descriptive and software-validation results, not calibrated market findings. The repository contains the PDF; the editable LaTeX source remains local.
 
-## Build path
+## Validation
 
-1. Persist a versioned, checksummed event journal and add crash/restart replay.
-2. Add timestamps, multiple instruments and venues, plus deterministic latency and fault injection.
-3. Add richer order types and a pretrade risk state machine.
-4. Build synthetic agent populations and market impact experiments.
-5. Fit and compare arrival models with held-out likelihood and time-rescaling diagnostics.
-6. Add Async at process boundaries and Incremental for reactive views after the pure core is stable.
+`dune runtest` covers directed invariants, journal corruption and truncation, risk-policy atomicity, point-process formulas, and real worker subprocesses. `bash scripts/stress.sh` builds and runs the full suite plus repeated multi-seed scenario determinism checks. [Runtime and stress details](scripts/README.md) include larger-run settings. GitHub Actions runs the same gates on pushes and pull requests.
 
-The core will remain deterministic; wall-clock time, IO, and concurrency belong at its boundary.
+## Boundaries
+
+The journal persists routed matching-engine commands, not account-risk requests or ledger state. Risk and both workers are single-instrument, in-memory research interfaces. The journal assumes an exclusive writer and does not call `fsync`; a successful flush is not a power-loss durability guarantee. The models and scenario metrics use synthetic data. There is no broker connectivity, market calibration, transaction-cost backtest, causal impact estimate, or supported profitability claim.

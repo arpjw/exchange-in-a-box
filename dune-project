@@ -4,4 +4,4 @@
 (package
  (name exchange_in_a_box)
  (synopsis "A deterministic OCaml exchange and market microstructure laboratory")
- (depends ocaml dune))
+ (depends (ocaml (>= 5.1)) dune (async (= v0.17.0)) (incremental (= v0.17.0))))

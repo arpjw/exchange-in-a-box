@@ -1,4 +1,23 @@
 (executable
  (name main)
+ (modules main)
  (public_name exchange-demo)
  (libraries exchange_in_a_box))
+
+(executable
+ (name scenario_cli)
+ (modules scenario_cli)
+ (public_name exchange-scenario)
+ (libraries exchange_in_a_box))
+
+(executable
+ (name worker)
+ (modules worker)
+ (public_name exchange-worker)
+ (libraries exchange_in_a_box))
+
+(executable
+ (name async_worker)
+ (modules async_worker)
+ (public_name exchange-async-worker)
+ (libraries exchange_in_a_box.adapters async))
