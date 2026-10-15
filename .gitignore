@@ -1,0 +1,8 @@
+_build/
+*.install
+.opam-switch/
+.DS_Store
+paper/*.pdf
+paper/*.aux
+paper/*.log
+paper/*.out

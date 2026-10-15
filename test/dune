@@ -1,0 +1,7 @@
+(test
+ (name book_test)
+ (libraries exchange_in_a_box))
+
+(test
+ (name analytics_test)
+ (libraries exchange_in_a_box))

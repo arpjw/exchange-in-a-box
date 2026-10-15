@@ -1,0 +1,4 @@
+(executable
+ (name main)
+ (public_name exchange-demo)
+ (libraries exchange_in_a_box))
