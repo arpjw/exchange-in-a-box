@@ -2,7 +2,7 @@ _build/
 *.install
 .opam-switch/
 .DS_Store
-paper/*.pdf
+paper/*.tex
 paper/*.aux
 paper/*.log
 paper/*.out

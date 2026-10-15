@@ -25,7 +25,7 @@ dune exec exchange-demo
 
 ## Mathematics
 
-The [paper draft](paper/exchange_in_a_box.tex) formalizes the transition system, conservation and book invariants, quote imbalance and microprice, and a stationary exponential Hawkes arrival model. The Hawkes module evaluates the exact point-process log likelihood and compensator increments. These are descriptive tools and hypotheses, not calibrated results.
+The [paper draft](paper/exchange_in_a_box.pdf) formalizes the transition system, conservation and book invariants, quote imbalance and microprice, and a stationary exponential Hawkes arrival model. The Hawkes module evaluates the exact point-process log likelihood and compensator increments. These are descriptive tools and hypotheses, not calibrated results. The repository contains the PDF; the editable LaTeX source remains local.
 
 ## Build path
 
